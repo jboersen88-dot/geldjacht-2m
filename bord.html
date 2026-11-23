@@ -20,11 +20,17 @@ td:last-child{border-radius:0 14px 14px 0}
 tr.top td{background:#ff8fa3}
 .n{text-align:center;width:150px}
 .leeg{color:#cfd6e6;font-size:28px}
+#nieuws .hot{background:#ffd166;color:var(--ink);border-radius:16px;padding:16px 22px;font-size:36px;font-weight:800;margin-bottom:10px}
+#nieuws .hot.nieuw{animation:pop 1s ease-out 3}
+#nieuws .oud{color:#cfd6e6;font-size:22px;margin:4px 0 0 6px}
+@keyframes pop{0%{transform:scale(1)}30%{transform:scale(1.06);box-shadow:0 0 40px #ffd166}100%{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){#nieuws .hot.nieuw{animation:none}}
 </style>
 </head>
 <body><main>
 <h1>💰 Geldjacht 2M: tussenstand</h1>
 <p class="sub">Wie heeft de meeste vragen goed? 😈 Pestkaarten zijn welkom… · <span id="tijd"></span></p>
+<div id="nieuws" aria-live="polite"></div>
 <div class="win" id="win"></div>
 <table><thead><tr><th>#</th><th>Groep</th><th class="n">Vragen goed</th><th class="n">⭐ Makkelijk</th><th class="n">⭐⭐ Moeilijk</th><th class="n">🧮 Reken</th><th class="n">Fotostukjes</th></tr></thead><tbody id="lijst"></tbody></table>
 <p class="leeg" id="leeg"></p>
@@ -32,15 +38,18 @@ tr.top td{background:#ff8fa3}
 <script>
 var SPEL="https://economie-2m-spel.nakijker-worker.workers.dev";
 function esc(t){return String(t==null?"":t).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
+var laatst=0;
 function laad(){
   fetch(SPEL).then(function(r){return r.json();}).then(function(d){
     var g=d.groepen.slice().sort(function(a,b){return (b.vragen-a.vragen)||(b.stukjes-a.stukjes)||(a.t-b.t);});
     document.getElementById("win").innerHTML=d.winnaars.slice(0,3).map(function(x,i){return ["🥇","🥈","🥉"][i]+" "+esc(x.namen);}).map(function(t){return "<div>"+t+"</div>";}).join("");
-    document.getElementById("lijst").innerHTML=g.map(function(x,i){return '<tr'+(i===0&&x.vragen>0&&!x.klaar?' class="top"':'')+'><td>'+(i+1)+'</td><td>'+esc(x.namen)+(x.klaar?" 🏁":"")+(i===0&&x.vragen>0&&!x.klaar?" 🎯":"")+'</td><td class="n">'+x.vragen+'</td><td class="n">'+(x.mk||0)+'/8</td><td class="n">'+(x.mo||0)+'/3</td><td class="n">'+(x.reken||0)+'/3</td><td class="n">'+x.stukjes+'</td></tr>';}).join("");
+    document.getElementById("lijst").innerHTML=g.map(function(x,i){return '<tr'+(i===0&&x.vragen>0&&!x.klaar?' class="top"':'')+'><td>'+(i+1)+'</td><td>'+esc(x.namen)+(x.verzekerd?" ☂️":"")+(x.klaar?" 🏁":"")+(i===0&&x.vragen>0&&!x.klaar?" 🎯":"")+'</td><td class="n">'+x.vragen+'</td><td class="n">'+(x.mk||0)+'/8</td><td class="n">'+(x.mo||0)+'/3</td><td class="n">'+(x.reken||0)+'/3</td><td class="n">'+x.stukjes+'</td></tr>';}).join("");
+    var e=(d.nieuws||[]).slice().reverse(),vers=e.length&&e[0].t>laatst&&laatst>0;if(e.length)laatst=Math.max(laatst,e[0].t);else laatst=laatst||1;
+    document.getElementById("nieuws").innerHTML=e.length&&Date.now()-e[0].t<600000?'<div class="hot'+(vers?' nieuw':'')+'">'+esc(e[0].tekst)+'</div>'+e.slice(1,4).map(function(x){return '<div class="oud">'+esc(x.tekst)+'</div>';}).join(""):"";
     document.getElementById("leeg").textContent=g.length?"":"Nog geen groepen gestart.";
     document.getElementById("tijd").textContent="bijgewerkt "+new Date().toLocaleTimeString("nl-NL",{hour:"2-digit",minute:"2-digit"});
   }).catch(function(){});
 }
-laad();setInterval(laad,10000);
+laad();setInterval(laad,5000);
 </script>
 </body></html>

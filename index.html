@@ -117,7 +117,7 @@ document.addEventListener("copy",function(e){var s=window.getSelection&&window.g
 function startScherm(){
   $("app").innerHTML='<h1>💰 Geldjacht 2M</h1><p class="sub">Economie 2 mavo · hoofdstuk 2 Jij en je geld (2.1 t/m 2.4)</p>'+
   '<div class="card"><p>Jullie spelen met z\'n tweeën. Beantwoord vragen, haal codes bij de docent en ontdek stukje voor stukje een foto van een plek in de school. Daar hangt een QR-code. De eerste 3 groepen die hem scannen winnen!</p>'+
-  '<p><b>Regels:</b> ⭐ een makkelijke vraag is een set van 3 meerkeuzevragen: alle drie goed = 1 goede vraag · ⭐⭐ moeilijke vragen en 🧮 rekenvragen kijkt de AI na · minstens '+DOEL.makkelijk+' makkelijke, '+DOEL.moeilijk+' moeilijke en '+DOEL.reken+' rekenvragen goed, pas dan blijft de foto zichtbaar en mag je scannen · na elke '+BONUS+' goede vragen krijg je een fotokaartje én een pestkaart 😈 · bij elke vraag staat in welke paragraaf je het antwoord vindt · een vraag overslaan mag altijd · pas als het scherm groen is mag je naar de docent.</p>'+
+  '<p><b>Regels:</b> ⭐ een makkelijke vraag is een set van 3 meerkeuzevragen: alle drie goed = 1 goede vraag · ⭐⭐ moeilijke vragen en 🧮 rekenvragen kijkt de AI na · minstens '+DOEL.makkelijk+' makkelijke, '+DOEL.moeilijk+' moeilijke en '+DOEL.reken+' rekenvragen goed, pas dan blijft de foto zichtbaar en mag je scannen · na elke '+BONUS+' goede vragen krijg je een fotokaartje én een pestkaart 😈 · ☂️ jullie kunnen je verzekeren tegen de volgende pestkaart: de premie is 1 goede vraag · bij elke vraag staat in welke paragraaf je het antwoord vindt · een vraag overslaan mag altijd · pas als het scherm groen is mag je naar de docent.</p>'+
   '<label for="n1">Voornaam 1</label><input id="n1" autocomplete="off" maxlength="25">'+
   '<label for="n2">Voornaam 2</label><input id="n2" autocomplete="off" maxlength="25">'+
   '<p id="startFout"></p><button class="prim" id="startBtn">Start het spel</button></div>';
@@ -146,6 +146,9 @@ function thuis(){
   '<button class="b-m" data-t="moeilijk"'+dis("moeilijk")+'><span style="font-size:30px">⭐⭐</span>Moeilijke theorie<small>open vraag · 2 fotostukjes</small></button>'+
   '<button class="b-r" data-t="reken"><span style="font-size:30px">🧮</span>Rekenvraag<small>2 fotostukjes</small></button></div>'+
   (S.dubbel?'<p class="melding pest">Pestkaart actief: nog '+(S.dubbel+1)+' vragen goed voordat het scherm groen wordt.</p>':'')+
+  (S.verzekerd?'<p class="melding goed">☂️ '+(S.verzOk?'Jullie zijn verzekerd: de volgende pestkaart die jullie krijgen, wordt geblokkeerd.':'Verzekering wordt geregeld…')+'</p>'
+   :S.premie?'<p class="melding goed">☂️ Premie: jullie volgende goede vraag betaalt de verzekering. Die vraag telt verder niet mee.</p>'
+   :'<button class="ghost" id="verzBtn" style="margin-top:10px">☂️ Verzekering afsluiten tegen pestkaarten (premie: 1 goede vraag)</button>')+
   '</div><div class="grid2"><div class="card"><h2 style="margin-top:0">Jullie foto</h2><div class="fotobox"><canvas id="cv" width="600" height="800" aria-label="Deels zichtbare foto"></canvas><div id="slotLaag"></div></div>'+
   '<div class="stat"><span class="pill">'+Math.min(S.stappen,n)+' van '+n+' stukjes</span></div></div>'+
   '<div class="card"><h2 style="margin-top:0">Voortgang</h2><div class="stat">'+
@@ -155,6 +158,9 @@ function thuis(){
   '<p class="klein">Gevonden plek? Scan de QR-code met de camera van deze iPad, of typ de code die eronder staat.</p></div></div>';
   Array.prototype.forEach.call(document.querySelectorAll(".kies button"),function(b){b.onclick=function(){nieuweVraag(b.getAttribute("data-t"));};});
   $("codeBtn").onclick=function(){stuurCode($("code").value,$("codeMsg"));};
+  if($("verzBtn"))$("verzBtn").onclick=function(){
+    if(!confirm("Verzekering afsluiten?\n\nPremie: jullie volgende goede vraag telt niet mee (geen fotokaartje en niet voor jullie doelen).\nDaarna blokkeert de verzekering de eerstvolgende pestkaart die jullie krijgen."))return;
+    S.premie=true;S.meld="";bewaar();thuis();};
   tekenFoto();
 }
 
@@ -329,6 +335,9 @@ function gekopieerd(ant,hints){
   return iw.length>=4&&hs.some(function(x){return iw.filter(function(y){return x.indexOf(" "+y+" ")>=0;}).length>=0.8*iw.length;});
 }
 function goed(){
+  if(S.premie){ // deze goede vraag betaalt de premie: telt niet mee, geen groen scherm
+    if(S.huidig.t==="reken")S.forceReken=false;
+    S.premie=false;S.verzekerd=true;S.verzOk=false;S.huidig=null;S.meld="☂️ Goed! Premie betaald. Jullie verzekering wordt geregeld.";bewaar();verzeker();return thuis();}
   var h=S.huidig;S.vragen++;if(h.t==="reken"){S.reken++;S.forceReken=false;}if(h.t==="makkelijk")S.mk=(S.mk||0)+1;if(h.t==="moeilijk")S.mo=(S.mo||0)+1;
   if(S.vragen%BONUS===0)S.bonus=true; // na elke BONUS goede vragen een fotokaartje én een pestkaart
   S.meld="";
@@ -386,19 +395,23 @@ function kiesDoel(code,r,msg){
     $("pestVerval").onclick=function(){S.meld="";if(S.wacht)S.wacht.pest=true;groenKlaar();};return;}
   if(!r.groepen.length){msg.innerHTML='<div class="melding fout">Er zijn nog geen andere groepen. Probeer het zo opnieuw (voer de code nog eens in).</div>';return;}
   msg.innerHTML='<div class="melding pest">😈 Pestkaart: '+esc(PESTKORT[r.effect])+'. Welke groep krijgt hem?</div><div class="doelen">'+
-    r.groepen.map(function(g){return g.beschermd?'<button class="ghost" disabled title="Net gepest">🛡️ '+esc(g.namen)+' (beschermd)</button>':'<button class="ghost" data-id="'+esc(g.id)+'">'+esc(g.namen)+'</button>';}).join("")+'</div>'+
-    '<p class="klein">🛡️ Een groep die net gepest is, is beschermd tot ze weer 2 vragen goed hebben.</p>';
+    r.groepen.map(function(g){return g.beschermd?'<button class="ghost" disabled title="Net gepest">🛡️ '+esc(g.namen)+' (beschermd)</button>':'<button class="ghost" data-id="'+esc(g.id)+'">'+(g.verzekerd?'☂️ ':'')+esc(g.namen)+(g.verzekerd?' (verzekerd)':'')+'</button>';}).join("")+'</div>'+
+    '<p class="klein">🛡️ Een groep die net gepest is, is beschermd tot ze weer 2 vragen goed hebben. ☂️ Een verzekerde groep blokkeert jullie pestkaart.</p>';
   Array.prototype.forEach.call(msg.querySelectorAll(".doelen button[data-id]"),function(b){b.onclick=function(){
     if(!confirm("Pestkaart sturen naar "+b.textContent+"?"))return;
     msg.innerHTML='<p class="klein">Versturen…</p>';
     post(SPEL,{a:"pest",id:S.id,code:code,doel:b.getAttribute("data-id")}).then(function(x){
       if(!x.ok){msg.innerHTML='<div class="melding fout">'+esc(x.fout)+'</div>';return;}
-      S.meld="😈 Pestkaart verstuurd naar "+x.namen+". Zij weten niet dat hij van jullie komt!";
+      S.meld=x.geblokt?"☂️ Pech! "+x.namen+" was verzekerd. Jullie pestkaart is geblokkeerd.":"😈 Pestkaart verstuurd naar "+x.namen+". Zij weten niet dat hij van jullie komt!";
       if(S.wacht)S.wacht.pest=true;groenKlaar();
     }).catch(function(){msg.innerHTML='<div class="melding fout">Geen verbinding. Voer de code opnieuw in.</div>';});
   };});
 }
+function verzeker(){
+  post(SPEL,{a:"verzeker",id:S.id}).then(function(r){if(!r.ok)return;S.verzOk=true;S.meld="☂️ Jullie zijn verzekerd tegen de volgende pestkaart!";bewaar();if(!S.wacht&&!S.huidig)thuis();}).catch(function(){});
+}
 function krijgPest(e){
+  if(e==="geblokt"){S.verzekerd=false;S.verzOk=false;S.meld="☂️ Een groep stuurde jullie een pestkaart, maar jullie verzekering betaalde de schade! Jullie zijn nu niet meer verzekerd.";return;}
   if(e==="weg2")S.stappen=Math.max(0,S.stappen-2);
   if(e==="reken")S.forceReken=true;
   if(e==="dubbel")S.dubbel=1;
@@ -409,6 +422,7 @@ function krijgPest(e){
 // Elke 10 seconden: voortgang doorgeven en kijken of er een pestkaart binnen is
 function sync(){
   if(!S||!S.id||S.plaats)return;
+  if(S.verzekerd&&!S.verzOk)verzeker(); // opnieuw proberen als het eerder niet lukte
   post(SPEL,{a:"voortgang",id:S.id,voortgang:voortgang()}).then(function(r){
     if(!r.pest||!r.pest.length)return;
     r.pest.forEach(krijgPest);bewaar();
