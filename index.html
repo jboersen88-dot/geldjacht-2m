@@ -97,7 +97,7 @@ var SPEL="https://economie-2m-spel.nakijker-worker.workers.dev";
 var AI="https://escape-room-ai.nakijker-worker.workers.dev";
 var NIV={makkelijk:{t:"Makkelijke theorie: 3 meerkeuzevragen",s:"⭐",kl:"var(--e)"},moeilijk:{t:"Moeilijke theorievraag",s:"⭐⭐",kl:"var(--m)"},reken:{t:"Rekenvraag",s:"🧮",kl:"var(--r)"}};
 var PAR={"2.1":"Jouw inkomen en uitgaven","2.2":"Met geld kun je meer","2.3":"Geld te kort","2.4":"Voor alle zekerheid"};
-var PEST={weg2:"Pestkaart! Jullie zijn 2 fotostukjes kwijt.",reken:"Pestkaart! Jullie volgende vraag MOET een rekenvraag zijn.",dubbel:"Pestkaart! Jullie moeten 2 vragen goed hebben voordat je naar de docent mag.",slot:"Pestkaart! Jullie foto zit 3 minuten op slot.",eigenrisico:"Pestkaart Eigen risico! Jullie hebben schade en betalen zelf het eigen risico: 1 goede makkelijke vraag gaat eraf."};
+var PEST={weg2:"Pestkaart! Jullie zijn 2 fotostukjes kwijt.",reken:"Pestkaart! Jullie volgende vraag MOET een rekenvraag zijn.",dubbel:"Pestkaart! Jullie moeten 2 vragen goed hebben voordat je naar de docent mag.",slot:"Pestkaart! Jullie foto zit 3 minuten op slot."};
 var DOEL={makkelijk:8,moeilijk:3,reken:3},BONUS=4; // BONUS: na elke 4 goede vragen fotokaartje + pestkaart
 var KEY="geldjacht-2m", S=null;
 try{S=JSON.parse(localStorage.getItem(KEY));}catch(e){}
@@ -375,7 +375,7 @@ function stuurCode(code,msg){
   code=String(code||"").trim();if(!code)return;
   var soort=code.toUpperCase().charAt(0);
   if(S.wacht&&S.wacht.stuk&&/[EMR]/.test(soort)){msg.innerHTML='<div class="melding fout">Jullie fotokaartje is al ingevoerd. Nu nog de pestkaart.</div>';return;}
-  if(S.wacht&&S.wacht.bonus&&S.wacht.pest&&/[PB]/.test(soort)){msg.innerHTML='<div class="melding fout">Jullie pestkaart is al weggegeven. Nu nog het fotokaartje.</div>';return;}
+  if(S.wacht&&S.wacht.bonus&&S.wacht.pest&&soort==="P"){msg.innerHTML='<div class="melding fout">Jullie pestkaart is al weggegeven. Nu nog het fotokaartje.</div>';return;}
   if(Date.now()<foutTot){msg.innerHTML='<div class="melding fout">Te veel foute codes. Wacht '+Math.ceil((foutTot-Date.now())/1000)+' seconden.</div>';return;}
   msg.innerHTML='<p class="klein">Code controleren…</p>';
   post(SPEL,{a:"code",id:S.id,code:code,wacht:S.wacht?S.wacht.niveau:null,voortgang:voortgang()}).then(function(r){
@@ -388,7 +388,7 @@ function stuurCode(code,msg){
     bewaar();$("groen").style.display="none";thuis();
   }).catch(function(){msg.innerHTML='<div class="melding fout">Geen verbinding. Probeer het opnieuw.</div>';});
 }
-var PESTKORT={weg2:"2 fotostukjes kwijt",reken:"volgende vraag moet een rekenvraag zijn",dubbel:"2 vragen goed voor het groene scherm",slot:"foto 3 minuten op slot",eigenrisico:"eigen risico: 1 makkelijke vraag eraf"};
+var PESTKORT={weg2:"2 fotostukjes kwijt",reken:"volgende vraag moet een rekenvraag zijn",dubbel:"2 vragen goed voor het groene scherm",slot:"foto 3 minuten op slot"};
 function kiesDoel(code,r,msg){
   var kan=r.groepen.filter(function(g){return !g.beschermd;});
   if(r.groepen.length&&!kan.length){msg.innerHTML='<div class="melding pest">🛡️ Alle andere groepen zijn net gepest en zijn even beschermd. Deze pestkaart vervalt.</div><button class="prim" id="pestVerval">Verder</button>';
@@ -416,7 +416,6 @@ function krijgPest(e){
   if(e==="reken")S.forceReken=true;
   if(e==="dubbel")S.dubbel=1;
   if(e==="slot")S.slotTot=Date.now()+180000;
-  if(e==="eigenrisico")S.mk=Math.max(0,(S.mk||0)-1);
   S.meld="😈 "+PEST[e];
 }
 // Elke 10 seconden: voortgang doorgeven en kijken of er een pestkaart binnen is
