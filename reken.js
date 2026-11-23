@@ -72,7 +72,7 @@ function(){var n=pick(NAMEN),s=rnd(8,40)*50,r=pick([1.5,2,2.5,3,4]),a1=rd(r/100*
     delen:[{l:"a",ant:s1,soort:"euro"},{l:"b",ant:a2,soort:"euro"}],formule:"rente jaar 1 = % : 100 × spaargeld; saldo na jaar 1 = spaargeld + rente; rente jaar 2 = % : 100 × saldo na jaar 1",
     uitw:"a. "+pr(r)+" van "+s+" = "+e2(a1)+"; "+s+" + "+getalNL(a1,2)+" = "+e2(s1)+"; b. "+pr(r)+" : 100 × "+getalNL(s1,2)+" = "+e2(a2)};},
 function(){var n=pick(NAMEN),s=rnd(8,60)*50,r=pick([0.8,1.2,1.5,1.8,2.2,2.5,3.5]),a=rd(r/100*s,2),p=rd(a/s*100,1);
-  return {p:"2.2",k:KOP.proc,v:n+" had een jaar lang "+eu(s)+" op een spaarrekening staan. Aan het eind van het jaar kreeg "+n+" "+e2(a)+" rente."+BRON+"Bereken hoeveel procent rente de bank gaf."+RO1,
+  return {p:"2.3",k:KOP.proc,v:n+" had een jaar lang "+eu(s)+" op een spaarrekening staan. Aan het eind van het jaar kreeg "+n+" "+e2(a)+" rente."+BRON+"Bereken hoeveel procent rente de bank gaf."+RO1,
     ant:p,soort:"procent",formule:"rente : spaargeld × 100",uitw:getalNL(a,2)+" : "+s+" × 100 = "+pc(p)};},
 
 /* ---------- 2.3 Lenen ---------- */
