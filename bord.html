@@ -43,7 +43,7 @@ function laad(){
   fetch(SPEL).then(function(r){return r.json();}).then(function(d){
     var g=d.groepen.slice().sort(function(a,b){return (b.vragen-a.vragen)||(b.stukjes-a.stukjes)||(a.t-b.t);});
     document.getElementById("win").innerHTML=d.winnaars.slice(0,3).map(function(x,i){return ["🥇","🥈","🥉"][i]+" "+esc(x.namen);}).map(function(t){return "<div>"+t+"</div>";}).join("");
-    document.getElementById("lijst").innerHTML=g.map(function(x,i){return '<tr'+(i===0&&x.vragen>0&&!x.klaar?' class="top"':'')+'><td>'+(i+1)+'</td><td>'+esc(x.namen)+(x.verzekerd?" ☂️":"")+(x.klaar?" 🏁":"")+(i===0&&x.vragen>0&&!x.klaar?" 🎯":"")+'</td><td class="n">'+x.vragen+'</td><td class="n">'+(x.mk||0)+'/8</td><td class="n">'+(x.mo||0)+'/3</td><td class="n">'+(x.reken||0)+'/3</td><td class="n">'+x.stukjes+'</td></tr>';}).join("");
+    document.getElementById("lijst").innerHTML=g.map(function(x,i){return '<tr'+(i===0&&x.vragen>0&&!x.klaar?' class="top"':'')+'><td>'+(i+1)+'</td><td>'+esc(x.namen)+(x.verzekerd?" ☂️":"")+(x.klaar?" 🏁":"")+(i===0&&x.vragen>0&&!x.klaar?" 🎯":"")+'</td><td class="n">'+x.vragen+'</td><td class="n">'+(x.mk||0)+'/7</td><td class="n">'+(x.mo||0)+'/3</td><td class="n">'+(x.reken||0)+'/3</td><td class="n">'+x.stukjes+'</td></tr>';}).join("");
     var e=(d.nieuws||[]).slice().reverse(),vers=e.length&&e[0].t>laatst&&laatst>0;if(e.length)laatst=Math.max(laatst,e[0].t);else laatst=laatst||1;
     document.getElementById("nieuws").innerHTML=e.length&&Date.now()-e[0].t<600000?'<div class="hot'+(vers?' nieuw':'')+'">'+esc(e[0].tekst)+'</div>'+e.slice(1,4).map(function(x){return '<div class="oud">'+esc(x.tekst)+'</div>';}).join(""):"";
     document.getElementById("leeg").textContent=g.length?"":"Nog geen groepen gestart.";

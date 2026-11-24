@@ -98,7 +98,7 @@ var AI="https://escape-room-ai.nakijker-worker.workers.dev";
 var NIV={makkelijk:{t:"Makkelijke theorie: 3 meerkeuzevragen",s:"⭐",kl:"var(--e)"},moeilijk:{t:"Moeilijke theorievraag",s:"⭐⭐",kl:"var(--m)"},reken:{t:"Rekenvraag",s:"🧮",kl:"var(--r)"}};
 var PAR={"2.1":"Jouw inkomen en uitgaven","2.2":"Met geld kun je meer","2.3":"Geld te kort","2.4":"Voor alle zekerheid"};
 var PEST={weg2:"Pestkaart! Jullie zijn 2 fotostukjes kwijt.",reken:"Pestkaart! Jullie volgende vraag MOET een rekenvraag zijn.",dubbel:"Pestkaart! Jullie moeten 2 vragen goed hebben voordat je naar de docent mag.",slot:"Pestkaart! Jullie foto zit 3 minuten op slot."};
-var DOEL={makkelijk:8,moeilijk:3,reken:3},BONUS=4; // BONUS: na elke 4 goede vragen fotokaartje + pestkaart
+var DOEL={makkelijk:7,moeilijk:3,reken:3},BONUS=4; // BONUS: na elke 4 goede vragen fotokaartje + pestkaart
 var KEY="geldjacht-2m", S=null;
 try{S=JSON.parse(localStorage.getItem(KEY));}catch(e){}
 function bewaar(){try{localStorage.setItem(KEY,JSON.stringify(S));localStorage.setItem("laatsteSpel",KEY);}catch(e){}}
